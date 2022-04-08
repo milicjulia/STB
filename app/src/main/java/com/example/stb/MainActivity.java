@@ -42,11 +42,6 @@ public class MainActivity extends Activity {
         stbrcc.doBindService();
     }
 
-    // --
-    // The following functions provide UI component modifiers :
-    // --
-
-    // 1st column: IP informations
 
     public String getLocalIpAddress() {
         WifiManager wm = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
