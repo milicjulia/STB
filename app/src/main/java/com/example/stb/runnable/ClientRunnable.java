@@ -14,7 +14,6 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ClientRunnable implements Runnable {
-
     private static final String TAG = ClientRunnable.class.getSimpleName();
 
     private Socket socket;
@@ -47,6 +46,11 @@ public class ClientRunnable implements Runnable {
                 } else if ("CLIENT_DISCONNECT".equals(messageTmp)) {
                     Log.i(TAG, "action for client " + socket.hashCode() + ": disconnected");
                     break;
+                } else if (Commands.USER_TEXT.equals(messageTmp)) {
+                    userTextInput = true;
+                } else if (userTextInput) {
+                    userTextTmp = messageTmp;
+                    userTextInput = false;
                 }
                 final String userText = userTextTmp;
                 final String message = messageTmp;
@@ -54,11 +58,22 @@ public class ClientRunnable implements Runnable {
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
                     @Override
                     public void run() {
-                      if (message.equals(Commands.SELECT)) rcs.sendMessageToUI(RemoteControlService.CMD__SELECT, null);
+                        if (message.equals(Commands.VIDEO_PLAY)) rcs.sendMessageToUI(RemoteControlService.CMD__VIDEO_PLAY, null);
+                        else if (message.equals(Commands.VIDEO_PAUSE)) rcs.sendMessageToUI(RemoteControlService.CMD__VIDEO_PAUSE, null);
+                        else if (message.equals(Commands.VIDEO_PREVIOUS)) rcs.sendMessageToUI(RemoteControlService.CMD__VIDEO_PREVIOUS, null);
+                        else if (message.equals(Commands.VIDEO_STOP)) rcs.sendMessageToUI(RemoteControlService.CMD__VIDEO_STOP, null);
+                        else if (message.equals(Commands.VIDEO_NEXT)) rcs.sendMessageToUI(RemoteControlService.CMD__VIDEO_NEXT, null);
+                        else if (message.equals(Commands.SELECT)) rcs.sendMessageToUI(RemoteControlService.CMD__SELECT, null);
                         else if (message.equals(Commands.MOVE_UP)) rcs.sendMessageToUI(RemoteControlService.CMD__MOVE_UP, null);
                         else if (message.equals(Commands.MOVE_DOWN)) rcs.sendMessageToUI(RemoteControlService.CMD__MOVE_DOWN, null);
+                        else if (message.equals(Commands.MOVE_LEFT)) rcs.sendMessageToUI(RemoteControlService.CMD__MOVE_LEFT, null);
+                        else if (message.equals(Commands.MOVE_RIGHT)) rcs.sendMessageToUI(RemoteControlService.CMD__MOVE_RIGHT, null);
+                        else if (message.equals(Commands.BACK)) rcs.sendMessageToUI(RemoteControlService.CMD__BACK, null);
+                        else if (message.equals(Commands.HOME)) rcs.sendMessageToUI(RemoteControlService.CMD__HOME, null);
+                        else if (message.equals(Commands.SOUND_MUTE)) rcs.sendMessageToUI(RemoteControlService.CMD__SOUND_MUTE, null);
                         else if (message.equals(Commands.SOUND_PLUS)) rcs.sendMessageToUI(RemoteControlService.CMD__SOUND_PLUS, null);
                         else if (message.equals(Commands.SOUND_MINUS)) rcs.sendMessageToUI(RemoteControlService.CMD__SOUND_MINUS, null);
+                        else if (userText != null) rcs.sendMessageToUI(RemoteControlService.CMD__USER_TEXT, userText);
                     }
                 });
                 // update UI

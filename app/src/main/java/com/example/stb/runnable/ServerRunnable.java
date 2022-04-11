@@ -10,7 +10,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 public class ServerRunnable implements Runnable {
-
     private static final String TAG = "ServerRunnable";
 
     private int port;
