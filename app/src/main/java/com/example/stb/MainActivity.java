@@ -34,12 +34,12 @@ import java.util.UUID;
 public class MainActivity extends Activity {
     private BluetoothAdapter BA;
     private Set<BluetoothDevice> pairedDevices;
-    private BluetoothSocket BS;
+    public static BluetoothSocket BS=null;
     public final static int COMMUNICATION_PORT = 2000;
     private static UUID uid=UUID.randomUUID();
     STBRemoteControlCommunication stbrcc;
-    private InputStream input;
-    private OutputStream output;
+    public static InputStream input=null;
+    public static OutputStream output=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,55 +66,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void getSocketStreams(){
-        try {
-            input = BS.getInputStream();
-            output =  BS.getOutputStream();
-        } catch (IOException e) {
-            Log.d("error", "getSocketStreams");
-        }
-    }
 
-    public void receivingData(){
-        byte[] buffer = new byte[1024];
-        int bytesCount;
-
-        while (true) {
-            try {
-                bytesCount = input.read(buffer);
-                if(buffer != null && bytesCount > 0) {
-                    Log.d("OK", "receivingData");
-                }
-            } catch (IOException e) {
-                Log.d("error", "receivingData");
-            }
-        }
-    }
-
-    public void sendingData(byte[] bytes){
-        try {
-            output.write(bytes);
-            Log.d("OK", "sendingData");
-        } catch (IOException e) {
-            Log.d("error", "sendingData");
-        }
-    }
-
-    public void connectSocket(){
-        try {
-            BS.connect();
-        } catch (IOException connEx) {
-            try {
-                BS.close();
-            } catch (IOException closeException) {
-                Log.d("error", "connectSocket");
-            }
-        }
-
-        if (BS != null && BS.isConnected()) {
-            Log.d("OK", "connectSocket");
-        }
-    }
 
     public void on() {
         if (!BA.isEnabled()) {
@@ -168,11 +120,10 @@ public class MainActivity extends Activity {
             if (i == 0) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     BluetoothDevice device = BA.getRemoteDevice(bt.getAddress());
-                    device.createBond();
+                   // device.createBond();
                     BA.cancelDiscovery();
                     initSocket(device);
-                    connectSocket();
-                    getSocketStreams();
+                    new BThread().start();
                 }
             }
             i++;
