@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
@@ -36,7 +37,7 @@ public class MainActivity extends Activity {
     private Set<BluetoothDevice> pairedDevices;
     public static BluetoothSocket BS=null;
     public final static int COMMUNICATION_PORT = 2000;
-    private static UUID uid=UUID.randomUUID();
+    private static UUID uid=null;
     STBRemoteControlCommunication stbrcc;
     public static InputStream input=null;
     public static OutputStream output=null;
@@ -61,7 +62,9 @@ public class MainActivity extends Activity {
 
     public void initSocket(BluetoothDevice device){
         try {
-            BS = device.createRfcommSocketToServiceRecord(uid);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                BS = device.createRfcommSocketToServiceRecord(UUID.fromString(String.valueOf(device.getUuids()[0])));
+            }
             Log.d("OK", "initSocket");
         } catch (IOException e) {
             Log.d("error", "initSocket");
@@ -125,6 +128,20 @@ public class MainActivity extends Activity {
         }
     }
 
+    private boolean STATE_CONNECTING=false;
+    public synchronized void connect() {
+
+        // Cancel any thread currently running a connection
+        if (bthread != null) {
+            bthread.stop();
+            bthread = null;
+        }
+
+        // Start the thread to connect with the given device
+        bthread = new BThread();
+        bthread.start();
+    }
+
     public void list() {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_DENIED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -139,11 +156,17 @@ public class MainActivity extends Activity {
             if (i == 0) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     BluetoothDevice device = BA.getRemoteDevice(bt.getAddress());
-                   // device.createBond();
-
+                    try {
+                        BS =(BluetoothSocket) device.getClass().getMethod("createRfcommSocket", new Class[] {int.class}).invoke(device,1);
+                    } catch (IllegalAccessException e) {
+                        e.printStackTrace();
+                    } catch (InvocationTargetException e) {
+                        e.printStackTrace();
+                    } catch (NoSuchMethodException e) {
+                        e.printStackTrace();
+                    }
                     initSocket(device);
-                    bthread=new BThread();
-                    bthread.start();
+                    connect();
                   //  write();
                 }
             }
