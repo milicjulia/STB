@@ -8,8 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class BThread extends Thread{
+    public static byte[] mmBuffer;
 
-    private Handler mHandler = new Handler() {
+    public Handler mHandler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             Log.d("Handler", "connected with device");
@@ -57,6 +58,7 @@ public class BThread extends Thread{
             Log.d("OK", "nesto");
         } catch (IOException connEx) {
             try {
+                connEx.printStackTrace();
                 MainActivity.BS.close();
                 Log.d("closing", "connectSocket");
             } catch (IOException closeException) {
@@ -72,15 +74,26 @@ public class BThread extends Thread{
 
     @Override
     public void run() {
-        int i=2;
-        connectSocket();
         getSocketStreams();
-       while(true){
+        MainActivity.BA.cancelDiscovery();
+        connectSocket();
+       while(MainActivity.BS.isConnected()) {
+           mmBuffer = new byte[1024];
+           int numBytes; // bytes returned from read()
 
-                mHandler.sendEmptyMessage(0);
-i++;
+           // Keep listening to the InputStream until an exception occurs.
+           while (true) {
+               try {
+                   numBytes = MainActivity.input.read(mmBuffer);
+                   Message readMsg = mHandler.obtainMessage(0, numBytes, -1, mmBuffer);
+                   readMsg.sendToTarget();
+               } catch (IOException e) {
+                   Log.d("error", "Input stream was disconnected", e);
+                   break;
+               }
+           }
+       }
 
-        }
 
     }
 }

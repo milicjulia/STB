@@ -32,7 +32,7 @@ import java.util.Set;
 import java.util.UUID;
 
 public class MainActivity extends Activity {
-    private BluetoothAdapter BA;
+    public static BluetoothAdapter BA;
     private Set<BluetoothDevice> pairedDevices;
     public static BluetoothSocket BS=null;
     public final static int COMMUNICATION_PORT = 2000;
@@ -40,6 +40,7 @@ public class MainActivity extends Activity {
     STBRemoteControlCommunication stbrcc;
     public static InputStream input=null;
     public static OutputStream output=null;
+    BThread bthread=null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +62,7 @@ public class MainActivity extends Activity {
     public void initSocket(BluetoothDevice device){
         try {
             BS = device.createRfcommSocketToServiceRecord(uid);
+            Log.d("OK", "initSocket");
         } catch (IOException e) {
             Log.d("error", "initSocket");
         }
@@ -106,6 +108,23 @@ public class MainActivity extends Activity {
 
     }
 
+    public void write(byte[] bytes) {
+        try {
+            output.write(bytes);
+            Message writtenMsg = bthread.mHandler.obtainMessage(1, -1, -1, bthread.mmBuffer);
+            writtenMsg.sendToTarget();
+        } catch (IOException e) {
+            Log.e("write error", "Error occurred when sending data", e);
+
+            // Send a failure message back to the activity.
+            Message writeErrorMsg = bthread.mHandler.obtainMessage(2);
+            Bundle bundle = new Bundle();
+            bundle.putString("toast", "Couldn't send data to the other device");
+            writeErrorMsg.setData(bundle);
+            bthread.mHandler.sendMessage(writeErrorMsg);
+        }
+    }
+
     public void list() {
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_DENIED) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -121,9 +140,11 @@ public class MainActivity extends Activity {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     BluetoothDevice device = BA.getRemoteDevice(bt.getAddress());
                    // device.createBond();
-                    BA.cancelDiscovery();
+
                     initSocket(device);
-                    new BThread().start();
+                    bthread=new BThread();
+                    bthread.start();
+                  //  write();
                 }
             }
             i++;
