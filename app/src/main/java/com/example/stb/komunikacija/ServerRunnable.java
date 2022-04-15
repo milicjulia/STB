@@ -1,5 +1,7 @@
 package com.example.stb.komunikacija;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -30,7 +32,6 @@ public class ServerRunnable implements Runnable {
 
                 final Socket sock_client = s.accept();
                 Log.i(TAG, "new client: "+sock_client.hashCode());
-
                 // launch a new thread for each new client - This thread will handle client commands/request from the remote control
                 ClientRunnable client_runnable = new ClientRunnable(sock_client, rcs);
                 Thread client_thread = new Thread(client_runnable);

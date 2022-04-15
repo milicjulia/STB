@@ -31,14 +31,21 @@ public class ClientRunnable implements Runnable {
     @Override
     public void run() {
         String messageTmp = null;
-        String userTextTmp = null;
-        boolean userTextInput = false;
         try {
             while (socket != null && socket.isConnected() && (messageTmp = in.readLine()) != null) {
                 Log.d(TAG, "receive from client " + socket.hashCode() + ": " + messageTmp);
-                if ("Hello".equals(messageTmp)) {
-                    sendMessage("World");
-                }
+                final String message = messageTmp;
+                // Send the key command to activities that listen to the service
+                new Handler(Looper.getMainLooper()).post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (message.equals(Commands.MOVE_UP)) rcs.sendMessageToUI(RemoteControlService.CMD__MOVE_UP, null);
+                        else if (message.equals(Commands.MOVE_DOWN)) rcs.sendMessageToUI(RemoteControlService.CMD__MOVE_DOWN, null);
+                        else if (message.equals(Commands.SOUND_PLUS)) rcs.sendMessageToUI(RemoteControlService.CMD__SOUND_PLUS, null);
+                        else if (message.equals(Commands.SOUND_MINUS)) rcs.sendMessageToUI(RemoteControlService.CMD__SOUND_MINUS, null);
+                    }
+                });
+                sendMessage(message + "__ok");
             }
         } catch (IOException e) {
             Log.e(TAG, e.getMessage());

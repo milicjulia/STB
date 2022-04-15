@@ -150,8 +150,6 @@ public class MainActivity extends Activity {
 
     private void connected(BluetoothSocket mmSocket) {
         Log.d(TAG, "connected: Starting.");
-
-        // Start the thread to manage the connection and perform transmissions
         mConnectedThread = new ConnectedThread(mmSocket);
         mConnectedThread.start();
     }
@@ -168,40 +166,50 @@ public class MainActivity extends Activity {
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
 
-
-
             try {
                 tmpIn = mmSocket.getInputStream();
                 tmpOut = mmSocket.getOutputStream();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
         }
 
+        public void chUp(){
+
+        }
+
+        public void chDown(){
+
+        }
+
+        public void volUp(){
+
+        }
+
+        public void volDown(){
+
+        }
+
+        public void play(int command){
+            int toChannel=command-(int)(command/10);
+        }
+
         public void run(){
-            byte[] buffer = new byte[1024];  // buffer store for the stream
-
-            int bytes; // bytes returned from read()
-
-            // Keep listening to the InputStream until an exception occurs
+            byte[] buffer = new byte[1024];
+            int bytes;
             while (true) {
-                // Read from the InputStream
                 try {
                     bytes = mmInStream.read(buffer);
                     final String incomingMessage = new String(buffer, 0, bytes);
-                    Log.d(TAG, "InputStream: " + incomingMessage);
-
-                    runOnUiThread(new Runnable() {
-
-                        @Override
-                        public void run() {
-                        }
-                    });
-
-
+                    switch(Integer.parseInt(incomingMessage)){
+                        case 1: chUp(); break;
+                        case 2: chDown(); break;
+                        case 3: volUp(); break;
+                        case 4: volDown(); break;
+                        default: play(Integer.parseInt(incomingMessage)); break;
+                    }
                 } catch (IOException e) {
                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage() );
                     break;

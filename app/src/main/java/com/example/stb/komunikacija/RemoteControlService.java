@@ -3,10 +3,12 @@ package com.example.stb.komunikacija;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.RemoteException;
 import android.util.Log;
 import com.example.stb.MainActivity;
 import java.util.ArrayList;
@@ -26,7 +28,6 @@ public class RemoteControlService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-
         ServerRunnable server_runnable = new ServerRunnable(this, MainActivity.COMMUNICATION_PORT);
         Thread server_thread = new Thread(server_runnable);
         server_thread.start();
@@ -41,6 +42,7 @@ public class RemoteControlService extends Service {
     class IncomingHandler extends Handler {
         @Override
         public void handleMessage(Message msg) {
+            if(mClients.size()==0) mClients.add(msg.replyTo);
             super.handleMessage(msg);
         }
     }
@@ -55,6 +57,19 @@ public class RemoteControlService extends Service {
     public void onDestroy() {
         super.onDestroy();
         Log.i(TAG, "Service Stopped.");
+    }
+
+    public void sendMessageToUI(int msg_type, String msg_value) {
+            try {
+                Bundle b = new Bundle();
+                b.putString("msg_value", ""+msg_value);
+                Message msg = Message.obtain(null, msg_type);
+                msg.setData(b);
+                mClients.get(0).send(msg);
+            } catch (RemoteException e) {
+                mClients.remove(0);
+            }
+
     }
 
 
