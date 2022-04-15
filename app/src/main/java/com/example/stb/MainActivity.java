@@ -79,16 +79,12 @@ public class MainActivity extends Activity {
 
 
     public void pairDevice() {
-
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         Log.e("MAinActivity", "" + pairedDevices.size() );
         if (pairedDevices.size() > 0) {
             Object[] devices = pairedDevices.toArray();
             BluetoothDevice device = (BluetoothDevice) devices[0];
-            //ParcelUuid[] uuid = device.getUuids();
-            Log.e("MAinActivity", "" + device );
-            //Log.e("MAinActivity", "" + uuid)
-
+            Log.e("MAinActivity", "" + device.getName() );
             ConnectThread connect = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
                 connect = new ConnectThread(device,
