@@ -1,15 +1,37 @@
 package com.example.stb;
 
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.UUID;
 
 public class BThread extends Thread{
     public static byte[] mmBuffer;
+    private BluetoothDevice device;
+    private BluetoothSocket socket;
+
+    public BThread(BluetoothDevice device, BluetoothSocket socket){
+        this.device=device;
+        this.socket=socket;
+    }
+
+    public void initSocket(){
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+                socket = device.createRfcommSocketToServiceRecord(UUID.fromString(String.valueOf(device.getUuids()[0])));
+            }
+            Log.d("OK", "initSocket");
+        } catch (IOException e) {
+            Log.d("error", "initSocket");
+        }
+    }
+
 
     public Handler mHandler = new Handler() {
         @Override
@@ -21,8 +43,8 @@ public class BThread extends Thread{
 
     public void getSocketStreams(){
         try {
-            MainActivity.input = MainActivity.BS.getInputStream();
-            MainActivity.output = MainActivity.BS.getOutputStream();
+            MainActivity.input = socket.getInputStream();
+            MainActivity.output = socket.getOutputStream();
         } catch (IOException e) {
             Log.d("error", "getSocketStreams");
         }
@@ -55,19 +77,19 @@ public class BThread extends Thread{
 
     public void connectSocket(){
         try {
-            MainActivity.BS.connect();
+            socket.connect();
             Log.d("OK", "nesto");
         } catch (IOException connEx) {
             try {
                 connEx.printStackTrace();
-                MainActivity.BS.close();
+                socket.close();
                 Log.d("closing", "connectSocket");
             } catch (IOException closeException) {
                 Log.d("error", "connectSocket");
             }
         }
 
-        if (MainActivity.BS != null && MainActivity.BS.isConnected()) {
+        if (socket != null && socket.isConnected()) {
             Log.d("OK", "connectSocket");
         }
     }
@@ -75,10 +97,10 @@ public class BThread extends Thread{
 
     @Override
     public void run() {
+        initSocket();
         getSocketStreams();
-        MainActivity.BA.cancelDiscovery();
         connectSocket();
-       while(MainActivity.BS.isConnected()) {
+       while(socket.isConnected()) {
            mmBuffer = new byte[1024];
            int numBytes; // bytes returned from read()
 
