@@ -3,11 +3,18 @@ package com.example.stb;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+
+import androidx.core.app.ActivityCompat;
+
+import com.example.stb.komunikacija.Commands;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -21,9 +28,8 @@ public class MainActivity extends Activity {
     private STBRemoteControlCommunication stbrcc;
     private static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private BluetoothDevice mmDevice;
-    private ConnectedThread mConnectedThread;
     private String TAG = "MainActivity";
+    private static  UUID myuuid= UUID.fromString("0000110a-0100-1000-8000-20805f9b34fb");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,68 +38,61 @@ public class MainActivity extends Activity {
         stbrcc.doBindService();
         if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.d("ERROR", "Permission1");
+                return;
+            }
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
-        pairDevice();
-    }
-
-    public void pairDevice() {
-        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
-        if (pairedDevices.size() > 0) {
-            BluetoothDevice device = (BluetoothDevice) pairedDevices.toArray()[0];
-            Log.e(TAG, "" + device.getName());
-            ConnectThread connect = null;
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
-                connect = new ConnectThread(device, device.getUuids()[0].getUuid());
-            }
+        AcceptThread connect = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            connect = new AcceptThread();
             connect.start();
         }
+
     }
 
 
-    private class ConnectThread extends Thread {
-        private BluetoothSocket mmSocket;
-        private String ConnectTag = "ConnectedThread";
+    private class AcceptThread extends Thread {
+        private final BluetoothServerSocket mmServerSocket;
 
-        public ConnectThread(BluetoothDevice device, UUID uuid) {
-            Log.d(ConnectTag, "Started.");
-            mmDevice = device;
+        public AcceptThread() {
+            BluetoothServerSocket tmp = null;
+            try {
+                // MY_UUID is the app's UUID string, also used by the client code.
+                tmp = bluetoothAdapter.listenUsingRfcommWithServiceRecord("STB",myuuid);
+            } catch (IOException e) {
+                Log.e(TAG, "Socket's listen() method failed", e);
+            }
+            mmServerSocket = tmp;
         }
 
         public void run() {
-            Log.i(ConnectTag, "Run");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1) {
+            Log.d("Acceptocket", "Run");
+            BluetoothSocket socket = null;
+            // Keep listening until exception occurs or a socket is returned.
+            while (true) {
                 try {
-                    mmSocket = (BluetoothSocket)mmDevice.getClass().getMethod("createInsecureRfcommSocket", new Class[]{int.class}).invoke(mmDevice, 1);
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
+                    socket = mmServerSocket.accept();
+                    Log.d("Acceptocket", "accept");
+                } catch (IOException e) {
+                    Log.e(TAG, "Socket's accept() method failed", e);
+                  return;
                 }
+                new ConnectedThread(socket).start();
             }
+        }
+
+        // Closes the connect socket and causes the thread to finish.
+        public void cancel() {
             try {
-                mmSocket.connect();
+                mmServerSocket.close();
             } catch (IOException e) {
-                try {
-                    mmSocket.close();
-                    Log.d(ConnectTag, "Closed Socket");
-                } catch (IOException e1) {
-                    Log.e(ConnectTag, "Unable to close socket connection");
-                }
-                e.printStackTrace();
-                return;
+                Log.e(TAG, "Could not close the connect socket", e);
             }
-            connected(mmSocket);
         }
     }
 
-    private void connected(BluetoothSocket mmSocket) {
-        Log.d(TAG, "connected: Starting");
-        mConnectedThread = new ConnectedThread(mmSocket);
-        mConnectedThread.start();
-    }
 
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
@@ -114,23 +113,36 @@ public class MainActivity extends Activity {
         }
 
         public void chUp() {
-            Log.d("command", "chup");
+            try{
+                Log.d("Command","chUp");
+                Runtime.getRuntime().exec("input keyevent "+ Commands.MOVE_UP);
+            }catch(Exception e){}
+
         }
 
         public void chDown() {
-            Log.d("command", "chdown");
+            try{
+                Log.d("Command","chDown");
+                Runtime.getRuntime().exec("input keyevent "+ Commands.MOVE_DOWN);
+            }catch(Exception e){}
         }
 
         public void volUp() {
-            Log.d("command", "volup");
+            try{
+                Log.d("Command","volUp");
+                Runtime.getRuntime().exec("input keyevent "+ Commands.SOUND_PLUS);
+            }catch(Exception e){}
         }
 
         public void volDown() {
-            Log.d("command", "voldown");
+            try{
+                Log.d("Command","volDown");
+                Runtime.getRuntime().exec("input keyevent "+ Commands.SOUND_MINUS);
+            }catch(Exception e){}
         }
 
         public void play(int command) {
-            Log.d("command", "play");
+            Log.d("command", "play 8->1");
             int toChannel = command - (int) (command / 10);
 
         }
@@ -140,8 +152,7 @@ public class MainActivity extends Activity {
             while (true) {
                 try {
                     bytes = mmInStream.read();
-                    final String incomingMessage = new String(String.valueOf(bytes));
-                    switch (Integer.parseInt(incomingMessage)) {
+                    switch (bytes) {
                         case 1:
                             chUp();
                             break;
@@ -155,7 +166,7 @@ public class MainActivity extends Activity {
                             volDown();
                             break;
                         default:
-                            play(Integer.parseInt(incomingMessage));
+                            play(bytes);
                             break;
                     }
                 } catch (IOException e) {
