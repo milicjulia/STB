@@ -33,7 +33,8 @@ public class ClientRunnable implements Runnable {
         String messageTmp = null;
         try {
             while (socket != null && socket.isConnected() && (messageTmp = in.readLine()) != null) {
-                Log.d(TAG, "receive from client " + socket.hashCode() + ": " + messageTmp);
+               // Log.d(TAG, "receive from client " + socket.hashCode() + ": " + messageTmp);
+                 Log.d("juliam", "receive from client " + socket.hashCode() + ": " + messageTmp);
                 final String message = messageTmp;
                 // Send the key command to activities that listen to the service
                 new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -55,7 +56,7 @@ public class ClientRunnable implements Runnable {
                 out.close();
                 socket.close();
             } catch (IOException e) {
-                Log.e(TAG, e.getMessage());
+                Log.e("juliam", e.getMessage());
             }
         }
     }
@@ -63,9 +64,10 @@ public class ClientRunnable implements Runnable {
     public void sendMessage(final String msg) {
         try {
             out.println(msg);
-            Log.d(TAG, "send to client " + socket.hashCode() + ": " + msg);
+            Log.d("juliam", "send to client " + socket.hashCode() + ": " + msg);
+            
         } catch (Exception e) {
-            Log.e(TAG, "ERROR:", e);
+            Log.e("juliam", "ERROR:", e);
         }
     }
 }

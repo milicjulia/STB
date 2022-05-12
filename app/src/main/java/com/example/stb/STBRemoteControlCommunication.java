@@ -13,7 +13,7 @@ import android.util.Log;
 
 public class STBRemoteControlCommunication {
 
-    private static final String TAG = "STBRemoteControlCommunication";
+    private static final String TAG = "juliam";
 
     Messenger mService = null;
     boolean mIsBound;
@@ -49,13 +49,13 @@ public class STBRemoteControlCommunication {
     };
 
     public void doBindService() {
-        Log.d("stbremotecontrolservice","trying to connect");
+        Log.d("juliam","trying to connect");
         Intent intent = new Intent("com.example.stb.komunikacija.RemoteControlService");
         intent.setPackage("com.example.stb.komunikacija");
         act.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         //act.bindService(new Intent("komunikacija.RemoteControlService.intent.action.Launch"), mConnection, Context.BIND_AUTO_CREATE);
         mIsBound = true;
-        Log.d("stbremotecontrolservice","connected");
+        Log.d("juliam","connected");
     }
 
     @SuppressLint("LongLogTag")

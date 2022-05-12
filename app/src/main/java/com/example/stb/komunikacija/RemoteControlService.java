@@ -14,7 +14,7 @@ import com.example.stb.MainActivity;
 import java.util.ArrayList;
 
 public class RemoteControlService extends Service {
-    public static final String TAG = "RemoteControlService";
+    public static final String TAG = "juliam";
 
     ArrayList<Messenger> mClients = new ArrayList<Messenger>(); // Keeps track of all current registered clients.
 

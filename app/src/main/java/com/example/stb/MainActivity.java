@@ -11,7 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
-import androidx.core.app.ActivityCompat;
+//import androidx.core.app.ActivityCompat;
 
 import com.example.stb.komunikacija.Commands;
 
@@ -28,7 +28,7 @@ public class MainActivity extends Activity {
     private STBRemoteControlCommunication stbrcc;
     private static final int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private String TAG = "MainActivity";
+    private String TAG = "juliam";
     private static  UUID myuuid= UUID.fromString("0000110a-0100-1000-8000-20805f9b34fb");
 
     @Override
@@ -38,10 +38,10 @@ public class MainActivity extends Activity {
         stbrcc.doBindService();
         if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+           /* if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 Log.d("ERROR", "Permission1");
                 return;
-            }
+            }*/
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
         AcceptThread connect = null;
@@ -97,7 +97,7 @@ public class MainActivity extends Activity {
     private class ConnectedThread extends Thread {
         private final BluetoothSocket mmSocket;
         private final InputStream mmInStream;
-        private String ConnectedTag="ConnectedThread";
+        private String ConnectedTag="juliam";
 
         public ConnectedThread(BluetoothSocket socket) {
             Log.d(ConnectedTag, "Starting");
@@ -114,7 +114,7 @@ public class MainActivity extends Activity {
 
         public void chUp() {
             try{
-                Log.d("Command","chUp");
+                Log.d("juliam","chUp");
                 Runtime.getRuntime().exec("input keyevent "+ Commands.MOVE_UP);
             }catch(Exception e){}
 
@@ -122,27 +122,27 @@ public class MainActivity extends Activity {
 
         public void chDown() {
             try{
-                Log.d("Command","chDown");
+                Log.d("juliam","chDown");
                 Runtime.getRuntime().exec("input keyevent "+ Commands.MOVE_DOWN);
             }catch(Exception e){}
         }
 
         public void volUp() {
             try{
-                Log.d("Command","volUp");
+                Log.d("juliam","volUp");
                 Runtime.getRuntime().exec("input keyevent "+ Commands.SOUND_PLUS);
             }catch(Exception e){}
         }
 
         public void volDown() {
             try{
-                Log.d("Command","volDown");
+                Log.d("juliam","volDown");
                 Runtime.getRuntime().exec("input keyevent "+ Commands.SOUND_MINUS);
             }catch(Exception e){}
         }
 
         public void play(int command) {
-            Log.d("command", "play 8->1");
+            Log.d("juliam", "play 8->1");
             int toChannel = command - (int) (command / 10);
 
         }
@@ -170,7 +170,7 @@ public class MainActivity extends Activity {
                             break;
                     }
                 } catch (IOException e) {
-                    Log.e(ConnectedTag, "write: Error reading Input Stream. " + e.getMessage());
+                    Log.e("juliam", "write: Error reading Input Stream. " + e.getMessage());
                     break;
                 }
             }
