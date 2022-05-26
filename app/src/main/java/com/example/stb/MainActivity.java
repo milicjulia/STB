@@ -1,5 +1,6 @@
 package com.example.stb;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -12,6 +13,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 //import androidx.core.app.ActivityCompat;
+
+import androidx.core.app.ActivityCompat;
 
 import com.example.stb.komunikacija.Commands;
 
@@ -31,6 +34,7 @@ public class MainActivity extends Activity {
     private String TAG = "juliam";
     private static  UUID myuuid= UUID.fromString("0000110a-0100-1000-8000-20805f9b34fb");
 
+    @SuppressLint("MissingPermission")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,10 +42,10 @@ public class MainActivity extends Activity {
         stbrcc.doBindService();
         if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-           /* if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 Log.d("ERROR", "Permission1");
                 return;
-            }*/
+            }
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
         AcceptThread connect = null;
@@ -56,6 +60,7 @@ public class MainActivity extends Activity {
     private class AcceptThread extends Thread {
         private final BluetoothServerSocket mmServerSocket;
 
+        @SuppressLint("MissingPermission")
         public AcceptThread() {
             BluetoothServerSocket tmp = null;
             try {

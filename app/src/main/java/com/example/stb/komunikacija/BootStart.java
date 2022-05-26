@@ -14,7 +14,7 @@ public class BootStart extends BroadcastReceiver {
 	String CUSTOM_INTENT = "RESTART_YEAH";
     public void onReceive(Context arg0, Intent arg1)
     {  
-        Intent intent = new Intent(arg0, BluetoothBoundService.class);
+        Intent intent = new Intent(arg0, RemoteControlService.class);
         intent.putExtra("kind", 10);
         intent.putExtra("first_start",true);
         arg0.startService(intent);
