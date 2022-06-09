@@ -13,11 +13,11 @@ import android.widget.Toast;
 public class BootStart extends BroadcastReceiver {
 	String CUSTOM_INTENT = "RESTART_YEAH";
     public void onReceive(Context arg0, Intent arg1)
-    {  
-        Intent intent = new Intent(arg0, RemoteControlService.class);
-        intent.putExtra("kind", 10);
-        intent.putExtra("first_start",true);
-        arg0.startService(intent);
+    {
+
+        arg0.startService(new Intent(arg0, RemoteControlService.class));
+
+
         Log.i("Autostart", "started");
         
         Log.d("juliam","BootStarp started");
