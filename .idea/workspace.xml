@@ -19,7 +19,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[ZY323F9R9L]" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="device_and_snapshot_combo_box_target[0123456789ABCDEF]" />
   <component name="ExternalProjectsData">
     <projectState path="$PROJECT_DIR$">
       <ProjectState />
@@ -51,7 +51,7 @@
     <property name="android-custom-view/home/juliam/Documents/GitHub/STB/app/src/main/java/com/example/stb/SquareLayout.java_SELECTED" value="SquareLayout" />
     <property name="android-custom-view/home/juliam/Documents/GitHub/STB/app/src/main/java/com/example/stb/SquareLayout.java_SquareLayout_DIMENSIONS" value="1080&#10;1920" />
     <property name="cidr.known.project.marker" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../daljinski" />
     <property name="memory.settings.postsync.last.time.stamp" value="1649668460656" />
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
